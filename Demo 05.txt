@@ -1,0 +1,291 @@
+Demo 05　爬論壇詳細資訊(1)
+--------------------------------------------------------------------------------
+5-1(A)
+
+from urllib import request
+from bs4 import BeautifulSoup
+
+headers={"Cookie":"over18=1",
+         "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+#最新頁面，無需帶數字參數
+url="https://www.ptt.cc/bbs/Japan_Travel/index.html"
+req=request.Request(url=url,headers=headers)
+res=request.urlopen(req)
+soup=BeautifulSoup(res,"html.parser")
+
+target=soup.findAll("div",{"class":"title"})
+for item in target:
+    articleTitle=item.a.text
+    articleUrl="https://www.ptt.cc"+item.a['href']    
+    articleReq=request.Request(url=articleUrl,headers=headers)
+    articleRes=request.urlopen(articleReq)
+    articleSoup=BeautifulSoup(articleRes,"html.parser")
+
+    #作者(、標題)及時間包覆於同標籤，可以列表取項
+    articleAuthor=articleSoup.findAll("span",{"class":"article-meta-value"})[0].text
+    articleTime=articleSoup.findAll("span",{"class":"article-meta-value"})[3].text
+    articleText=articleSoup.find("div",{"id":"main-content"}).text.split("--")[0]
+
+--------------------------------------------------------------------------------
+5-1(B)
+
+from urllib import request
+from bs4 import BeautifulSoup
+
+headers={"Cookie":"over18=1",
+         "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+
+url="https://www.ptt.cc/bbs/Japan_Travel/index.html"
+req=request.Request(url=url,headers=headers)
+res=request.urlopen(req)
+soup=BeautifulSoup(res,"html.parser")
+
+target=soup.findAll("div",{"class":"title"})
+for item in target:
+    articleTitle=item.a.text
+    articleUrl="https://www.ptt.cc"+item.a['href']    
+    articleReq=request.Request(url=articleUrl,headers=headers)
+    articleRes=request.urlopen(articleReq)
+    articleSoup=BeautifulSoup(articleRes,"html.parser")
+
+    articleAuthor=articleSoup.findAll("span",{"class":"article-meta-value"})[0].text
+    articleTime=articleSoup.findAll("span",{"class":"article-meta-value"})[3].text
+    articleText=articleSoup.find("div",{"id":"main-content"}).text.split("--")[0]
+
+    good=len(articleSoup.findAll("span",{"class":"hl push-tag"}))
+    #推、噓分篇統計，要寫迴圈內(新篇歸零)
+    bad=0
+    reply=articleSoup.findAll("span",{"class":"f1 hl push-tag"})
+    for pushtag in reply:
+        #pushtag仍是含標籤之項，要取字串
+        if pushtag.text=="噓 ":
+            bad+=1
+
+--------------------------------------------------------------------------------
+5-1(C)
+
+from urllib import request
+from bs4 import BeautifulSoup
+
+headers={"Cookie":"over18=1",
+         "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://www.ptt.cc/bbs/Japan_Travel/index.html"
+
+pages=int(input("欲爬取頁面數量:"))
+#迴圈執行pages次
+for i in range(pages):
+    req=request.Request(url=url,headers=headers)
+    res=request.urlopen(req)
+    soup=BeautifulSoup(res,"html.parser")
+
+    target=soup.findAll("div",{"class":"title"})
+    for item in target:
+        articleTitle=item.a.text
+        articleUrl="https://www.ptt.cc"+item.a['href']    
+        articleReq=request.Request(url=articleUrl,headers=headers)
+        articleRes=request.urlopen(articleReq)
+        articleSoup=BeautifulSoup(articleRes,"html.parser")
+
+        articleAuthor=articleSoup.findAll("span",{"class":"article-meta-value"})[0].text
+        articleTime=articleSoup.findAll("span",{"class":"article-meta-value"})[3].text
+        articleText=articleSoup.find("div",{"id":"main-content"}).text.split("--")[0]
+
+        good=len(articleSoup.findAll("span",{"class":"hl push-tag"}))
+        bad=0
+        reply=articleSoup.findAll("span",{"class":"f1 hl push-tag"})
+        for pushtag in reply:
+            if pushtag.text=="噓 ":
+                bad+=1
+
+    #尋找上、下頁按鈕之標籤
+    button=soup.findAll("a",{"class":"btn wide"})
+    #列表中取項覆寫，成為新url
+    url="https://www.ptt.cc/"+button[1]['href']
+
+--------------------------------------------------------------------------------
+5-1(D)
+
+from urllib import request
+from bs4 import BeautifulSoup
+#引入pandas框架，定義表格欄位
+import pandas
+
+headers={"Cookie":"over18=1",
+         "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://www.ptt.cc/bbs/Japan_Travel/index.html"
+article=pandas.DataFrame(columns=["網址","標題","作者","時間","推數","噓數"])
+
+loc=0
+pages=int(input("欲爬取頁面數量:"))
+for i in range(pages):
+    req=request.Request(url=url,headers=headers)
+    res=request.urlopen(req)
+    soup=BeautifulSoup(res,"html.parser")
+
+    target=soup.findAll("div",{"class":"title"})
+    for item in target:
+        articleTitle=item.a.text
+        articleUrl="https://www.ptt.cc"+item.a['href']    
+        articleReq=request.Request(url=articleUrl,headers=headers)
+        articleRes=request.urlopen(articleReq)
+        articleSoup=BeautifulSoup(articleRes,"html.parser")
+
+        articleAuthor=articleSoup.findAll("span",{"class":"article-meta-value"})[0].text
+        articleTime=articleSoup.findAll("span",{"class":"article-meta-value"})[3].text
+        articleText=articleSoup.find("div",{"id":"main-content"}).text.split("--")[0]
+
+        good=len(articleSoup.findAll("span",{"class":"hl push-tag"}))
+        bad=0
+        reply=articleSoup.findAll("span",{"class":"f1 hl push-tag"})
+        for pushtag in reply:
+            if pushtag.text=="噓 ":
+                bad+=1
+
+        #依欄位逐筆增寫入列表，迴圈初始需清空
+        content=[]
+        content.append(articleUrl)
+        content.append(articleTitle)
+        content.append(articleAuthor)
+        content.append(articleTime)
+        content.append(good)
+        content.append(bad)
+
+        #列表row-index寫入pandas
+        article.loc[loc]=content
+        loc+=1
+
+    button=soup.findAll("a",{"class":"btn wide"})
+    url="https://www.ptt.cc/"+button[1]['href']
+
+print(article) 
+
+--------------------------------------------------------------------------------
+5-1(E)
+
+from urllib import request
+from bs4 import BeautifulSoup
+import pandas
+import xlwt
+import os
+
+#使用者自訂檔案存放路徑
+dir=input("輸入檔案路徑:")
+filename=input("輸入檔名:")
+if not os.path.exists(dir):
+    os.mkdir(dir)
+
+headers={"Cookie":"over18=1",
+         "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://www.ptt.cc/bbs/Japan_Travel/index.html"
+article=pandas.DataFrame(columns=["網址","標題","作者","時間","推數","噓數"])
+
+loc=0
+pages=int(input("欲爬取頁面數量:"))
+for i in range(pages):
+    req=request.Request(url=url,headers=headers)
+    res=request.urlopen(req)
+    soup=BeautifulSoup(res,"html.parser")
+
+    target=soup.findAll("div",{"class":"title"})
+    for item in target:
+        articleTitle=item.a.text
+        articleUrl="https://www.ptt.cc"+item.a['href']    
+        articleReq=request.Request(url=articleUrl,headers=headers)
+        articleRes=request.urlopen(articleReq)
+        articleSoup=BeautifulSoup(articleRes,"html.parser")
+
+        articleAuthor=articleSoup.findAll("span",{"class":"article-meta-value"})[0].text
+        articleTime=articleSoup.findAll("span",{"class":"article-meta-value"})[3].text
+        articleText=articleSoup.find("div",{"id":"main-content"}).text.split("--")[0]
+
+        good=len(articleSoup.findAll("span",{"class":"hl push-tag"}))
+        bad=0
+        reply=articleSoup.findAll("span",{"class":"f1 hl push-tag"})
+        for pushtag in reply:
+            if pushtag.text=="噓 ":
+                bad+=1
+
+        content=[]
+        content.append(articleUrl)
+        content.append(articleTitle)
+        content.append(articleAuthor)
+        content.append(articleTime)
+        content.append(good)
+        content.append(bad)
+
+        article.loc[loc]=content
+        loc+=1
+
+    button=soup.findAll("a",{"class":"btn wide"})
+    url="https://www.ptt.cc/"+button[1]['href']
+
+#將pandas框架轉儲為.xls檔輸出
+article.to_excel("%s/%s.xls"%(div,filename),encoding="utf-8")
+
+--------------------------------------------------------------------------------
+5-1(F)
+
+from urllib import request
+from bs4 import BeautifulSoup
+import pandas
+import xlwt
+import os
+
+dir=input("輸入檔案路徑:")
+filename=input("輸入檔名:")
+if not os.path.exists(dir):
+    os.mkdir(dir)
+
+headers={"Cookie":"over18=1",
+         "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://www.ptt.cc/bbs/Japan_Travel/index.html"
+article=pandas.DataFrame(columns=["網址","標題","作者","時間","推數","噓數"])
+
+loc=0
+pages=int(input("欲爬取頁面數量:"))
+#累積報錯數，供結果輸出
+error=0
+for i in range(pages):
+    req=request.Request(url=url,headers=headers)
+    res=request.urlopen(req)
+    soup=BeautifulSoup(res,"html.parser")
+
+    target=soup.findAll("div",{"class":"title"})
+    for item in target:
+        try:
+            articleTitle=item.a.text
+            articleUrl="https://www.ptt.cc"+item.a['href']    
+            articleReq=request.Request(url=articleUrl,headers=headers)
+            articleRes=request.urlopen(articleReq)
+            articleSoup=BeautifulSoup(articleRes,"html.parser")
+
+            articleAuthor=articleSoup.findAll("span",{"class":"article-meta-value"})[0].text
+            articleTime=articleSoup.findAll("span",{"class":"article-meta-value"})[3].text
+            articleText=articleSoup.find("div",{"id":"main-content"}).text.split("--")[0]
+
+            good=len(articleSoup.findAll("span",{"class":"hl push-tag"}))
+            bad=0
+            reply=articleSoup.findAll("span",{"class":"f1 hl push-tag"})
+            for pushtag in reply:
+                if pushtag.text=="噓 ":
+                    bad+=1
+
+            content=[]
+            content.append(articleUrl)
+            content.append(articleTitle)
+            content.append(articleAuthor)
+            content.append(articleTime)
+            content.append(good)
+            content.append(bad)
+
+            article.loc[loc]=content
+            loc+=1
+        #當title=none(如文章被刪除)則raise AttributeError
+        except AttributeError:
+            error+=1
+            
+    button=soup.findAll("a",{"class":"btn wide"})
+    url="https://www.ptt.cc/"+button[1]['href']
+
+print("爬蟲結束，有%d篇文章已被刪除"%(error))
+article.to_excel("%s/%s.xls"%(dir,filename),encoding="utf-8")

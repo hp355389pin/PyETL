@@ -1,0 +1,83 @@
+Appendix 02　RSS爬蟲
+--------------------------------------------------------------------------------
+A2.1
+
+from urllib import request
+from bs4 import BeautifulSoup
+
+headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://about.pts.org.tw/rss/XML/newsletter.xml"
+req=request.Request(url=url,headers=headers)
+res=request.urlopen(req)
+
+#以lxml處理xml網頁，如同html.parser處理一般網頁
+soup=BeautifulSoup(res,"lxml")
+print(soup)
+
+--------------------------------------------------------------------------------
+A2.2　#公視新聞稿
+
+from urllib import request
+from bs4 import BeautifulSoup
+#pandas框架搭配.xls檔案輸出
+import pandas
+import xlwt
+
+headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://about.pts.org.tw/rss/XML/newsletter.xml"
+req=request.Request(url=url,headers=headers)
+res=request.urlopen(req)
+soup=BeautifulSoup(res,"lxml")
+article=pandas.DataFrame(columns=["標題","文章內容"])
+
+loc=0
+target=soup.findAll("item")
+for item in target:
+    articleTitle=item.title.text
+    articleText=item.description.text
+
+    content=[]
+　　content.append(articleTitle)
+    content.append(articleText)
+    #逐筆row-index寫入列表中  
+    article.loc[loc]=content
+    loc+=1
+
+print("爬蟲結束，共計%d篇文章"%(loc))
+article.to_excel("C:/PyETL/公視新聞稿.xls",encoding="utf-8")
+
+--------------------------------------------------------------------------------
+A2.3　#BBC中文網國際新聞版
+
+from urllib import request
+from bs4 import BeautifulSoup
+#pandas框架搭配.xls檔案輸出
+import pandas
+import xlwt
+
+headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="http://www.bbc.co.uk/zhongwen/trad/world/index.xml"
+req=request.Request(url=url,headers=headers)
+res=request.urlopen(req)
+soup=BeautifulSoup(res,"lxml")
+article=pandas.DataFrame(columns=["網址","標題","時間","文章內容"])
+
+loc=0
+target=soup.findAll("entry")
+for item in target:
+    articleUrl=item.link["href"]
+    articleTitle=item.title.text
+    articleTime=item.published.text
+    articleText=item.summary.text
+
+    content=[]
+    content.append(articleUrl)
+    content.append(articleTitle)
+    content.append(articleTime)
+    content.append(articleText)
+    #逐筆row-index寫入列表中
+    article.loc[loc]=content
+    loc+=1
+
+print("爬蟲結束，共計%d篇文章"%(loc))
+article.to_excel("C:/PyETL/BBC中文網國際新聞版.xls",encoding="utf-8")

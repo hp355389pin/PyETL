@@ -1,0 +1,100 @@
+Lecture 04　圖片查取及下載
+--------------------------------------------------------------------------------
+4.1
+
+from urllib import request
+from bs4 import BeautifulSoup
+
+#headers,Cookies為字典格式，寫在同一本
+headers={"Cookie":"over18=1",
+         "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://www.ptt.cc/bbs/Japan_Travel/M.1575204621.A.A95.html"
+
+#發送request時加上headers資訊
+req=request.Request(url=url,headers=headers)
+res=request.urlopen(req)
+soup=BeautifulSoup(res,"html.parser")
+
+#查找<a>聯結，輸出為列表再篩選
+link=soup.findAll("a",{"rel":"nofollow"})
+for item in link:
+    #篩選包含imgur(圖片)者縮排輸出
+    if "https://i.imgur.com" in item["href"]:
+        print("\t"+item.text)
+
+--------------------------------------------------------------------------------
+4.2　re模組:re.search()
+
+from urllib import request
+from bs4 import BeautifulSoup
+import re
+
+#headers,Cookies為字典格式，寫在同一本
+headers={"Cookie":"over18=1",
+         "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://www.ptt.cc/bbs/Japan_Travel/M.1575204621.A.A95.html"
+
+#發送request時加上headers資訊
+req=request.Request(url=url,headers=headers)
+res=request.urlopen(req)
+soup=BeautifulSoup(res,"html.parser")
+
+#查找<a>聯結，輸出為列表再篩選
+link=soup.findAll("a",{"rel":"nofollow"})
+for item in link:
+    #search於字串中搜尋，group輸出完整字串
+    match=re.search(r"https://i.imgur[a-zA-Z0-9/._]+",item["href"])
+    if match:
+        print(match.group())
+
+--------------------------------------------------------------------------------
+4.3　re模組:re.findall()
+
+from urllib import request
+from bs4 import BeautifulSoup
+import re
+
+#headers,Cookies為字典格式，寫在同一本
+headers={"Cookie":"over18=1",
+         "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://www.ptt.cc/bbs/Japan_Travel/M.1575204621.A.A95.html"
+
+#發送request時加上headers資訊
+req=request.Request(url=url,headers=headers)
+res=request.urlopen(req)
+soup=BeautifulSoup(res,"html.parser")
+
+#查找<a>聯結，輸出為列表再篩選
+link=soup.findAll("a",{"rel":"nofollow"})
+for item in link:
+    #findall(注意:非findAll)以列表輸出結果，取首項即可
+    match=re.findall(r"https://i.imgur[a-zA-Z0-9/._]+",item["href"])
+    if match:
+        print(match[0])
+
+--------------------------------------------------------------------------------
+4.4　urlretrieve
+
+from urllib import request
+from bs4 import BeautifulSoup
+
+#headers,Cookies為字典格式，寫在同一本
+headers={"Cookie":"over18=1",
+         "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://www.ptt.cc/bbs/Japan_Travel/M.1575204621.A.A95.html"
+
+#發送request時加上headers資訊
+req=request.Request(url=url,headers=headers)
+res=request.urlopen(req)
+soup=BeautifulSoup(res,"html.parser")
+
+title=soup.findAll("span",{"class":"article-meta-value"})[2].text
+#查找<a>聯結，輸出為列表再篩選
+link=soup.findAll("a",{"rel":"nofollow"})
+#enumerate產生數對(逐項遞增)
+for n,item in enumerate(link):
+    #篩選包含imgur(圖片)者縮排輸出
+    if "https://i.imgur.com" in item["href"]:
+        location="C:/PyETL/%s_%d.jpg"%(title,n)
+        #下載url於指定本地位址
+        request.urlretrieve(item["href"],location)

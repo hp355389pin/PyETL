@@ -1,0 +1,85 @@
+Lecture 02　headers,Cookies資訊
+--------------------------------------------------------------------------------
+2.1　headers(字典)
+
+from urllib import request
+
+#headers為字典格式
+headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://www.ptt.cc/bbs/joke/index.html"
+
+#發送request時加上headers資訊
+req=request.Request(url=url,headers=headers)
+res=request.urlopen(req)
+
+print(res.read().decode("utf-8"))
+
+--------------------------------------------------------------------------------
+2.2
+
+from urllib import request
+from bs4 import BeautifulSoup
+
+#headers為字典格式
+headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://www.ptt.cc/bbs/joke/index.html"
+
+#發送request時加上headers資訊
+req=request.Request(url=url,headers=headers)
+res=request.urlopen(req)
+soup=BeautifulSoup(res,"html.parser")
+
+print(soup)
+
+--------------------------------------------------------------------------------
+2.3　header requests
+
+import requests
+from bs4 import BeautifulSoup
+
+#headers為字典格式
+headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://www.ptt.cc/bbs/joke/index.html"
+
+#requests無urlopen方法(故req,res步驟合併)
+res=requests.get(url=url,headers=headers)
+#requests無read方法，需藉BeautifulSoup解碼
+soup=BeautifulSoup(res.text,"html.parser")
+
+print(soup)
+
+--------------------------------------------------------------------------------
+2.4　Cookies
+
+from urllib import request
+from bs4 import BeautifulSoup
+
+#headers,Cookies為字典格式，寫在同一本
+headers={"Cookie":"over18=1",
+         "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+url="https://www.ptt.cc/bbs/Gossiping/index.html"
+
+#發送request時加上headers資訊
+req=request.Request(url=url,headers=headers)
+res=request.urlopen(req)
+soup=BeautifulSoup(res,"html.parser")
+
+print(soup)
+
+--------------------------------------------------------------------------------
+2.5　Cookies requests
+
+import requests
+from bs4 import BeautifulSoup
+
+#headers,Cookies為字典格式，分開寫兩本
+headers={"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36"}
+Cookies={"over18":"1"}
+url="https://www.ptt.cc/Gossiping/joke/index.html"
+
+#requests無urlopen方法(故req,res步驟合併)
+res=requests.get(url=url,headers=headers,cookies=Cookies)
+#requests無read方法，需藉BeautifulSoup解碼
+soup=BeautifulSoup(res.text,"html.parser")
+
+print(soup)

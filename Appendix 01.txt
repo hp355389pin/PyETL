@@ -1,0 +1,66 @@
+Appendix 01　Selenium
+--------------------------------------------------------------------------------
+A1.1　get
+
+#需先安裝selenium及下載Chrome driver
+from selenium.webdriver import Chrome
+driver=Chrome("./chromedriver")
+
+url="https://www.ptt.cc/bbs/index.html"
+#提出請求，執行後將自動開啟一瀏覽分頁
+driver.get(url)
+
+--------------------------------------------------------------------------------
+A1.2　find,click
+
+from selenium.webdriver import Chrome
+driver=Chrome("./chromedriver")
+
+url="https://www.ptt.cc/bbs/index.html"
+driver.get(url)
+#以class name尋找標籤，並自動點擊
+driver.find_element_by_class_name("board-name").click()
+#同理，亦以此點擊年齡分級管理頁面
+driver.find_element_by_class_name("btn-big").click()
+
+--------------------------------------------------------------------------------
+A1.3　cookies
+
+from selenium.webdriver import Chrome
+driver=Chrome("./chromedriver")
+
+url="https://www.ptt.cc/bbs/index.html"
+driver.get(url)
+driver.find_element_by_class_name("board-name").click()
+driver.find_element_by_class_name("btn-big").click()
+
+#取得cookies資訊並印出
+cookies=driver.get_cookies()
+for item in cookies:
+    print(item)
+
+--------------------------------------------------------------------------------
+A1.4
+
+from selenium.webdriver import Chrome
+import requests
+from bs4 import BeautifulSoup
+
+driver=Chrome("./chromedriver")
+url="https://www.ptt.cc/bbs/index.html"
+driver.get(url)
+driver.find_element_by_class_name("board-name").click()
+driver.find_element_by_class_name("btn-big").click()
+
+cookies=driver.get_cookies()
+driver.close()
+
+#以session搭配requests.get(url,cookies)發送請求
+ss=requests.session()
+for item in cookies:
+    ss.cookies.set(item["name"],item["value"])
+
+res=ss.get("https://www.ptt.cc/bbs/Gossiping/index.html")
+#requests需加註.text，使用prettify輸出結構
+soup=BeautifulSoup(res.text,"html.parser")
+print(soup.prettify())
